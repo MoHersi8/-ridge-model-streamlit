@@ -1,18 +1,27 @@
-from flask import Flask, request, jsonify
-import joblib  # Ensure you have joblib to load the model
+import streamlit as st
+import joblib
+import numpy as np
 
-app = Flask(__name__)
-
-# Load the trained model (make sure you have the correct path)
+# Load the trained model
 model = joblib.load('/Users/mohersi/Desktop/ridge_model.pkl')
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    data = request.get_json()  # Get data from POST request
-    features = data['features']  # Assuming your data is in the 'features' field
+# Streamlit interface
+st.title("Ridge Regression Model")
 
-    prediction = model.predict([features])  # Make prediction
-    return jsonify({'prediction': prediction.tolist()})  # Return prediction as JSON
+# Input field for user features
+st.write("Enter the feature values for prediction:")
+features = st.text_input("Input features (comma-separated):", "")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Prediction logic
+if st.button("Predict"):
+    try:
+        # Convert the comma-separated string to a list of floats
+        features = [float(x) for x in features.split(",")]
+
+        # Perform the prediction
+        prediction = model.predict([features])  # Adjust if your model expects a different shape
+        st.write(f"Prediction: {prediction[0]}")
+    except ValueError:
+        st.error("Please enter valid numeric values separated by commas.")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
